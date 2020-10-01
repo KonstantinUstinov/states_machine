@@ -38,4 +38,12 @@ class StateServiceTest extends FlatSpec
     }
   }
 
+  "Service" should "retun Not Found" in {
+    Put(s"/state/change/2", NewState("Pending"))~> stateRoute ~> check {
+      status shouldBe NotFound
+      contentType shouldBe `application/json`
+      responseAs[ErrorDetail] shouldBe ErrorDetail(404, "java.lang.Exception: FSM not found", Some("FSM not found"), Some("FSM not found"))
+    }
+  }
+
 }
