@@ -46,11 +46,21 @@ trait StateService extends StateProtocol with  LazyLogging {
       pathPrefix("change" / IntNumber) { id =>
         entity(as[NewState]) { item =>
           onComplete(stateActor ? ChangeState(id, item.state)) { result =>
-            (futureState orElse futureDefault)(result)
+            (futureChangeState orElse futureDefault)(result)
           }
         }
       }
     }
+  }
+
+  val futureChangeState : PartialFunction[Try[Any], server.Route] = {
+    case Success(response: Try[(String, String, Int)]) =>
+      response match {
+        case Success(value) =>
+          complete(200, ChangeStateResponse(value._3, value._2, value._1))
+        case Failure(e) =>
+          complete(404, ErrorDetail(404, e.toString, Some(e.getMessage), Some(e.getLocalizedMessage)))
+      }
   }
 
   val futureState : PartialFunction[Try[Any], server.Route] = {
@@ -61,13 +71,6 @@ trait StateService extends StateProtocol with  LazyLogging {
           complete(200, InfoDetail(value, "Тew FSM added successfully"))
         case Failure(e) =>
           complete(500, ErrorDetail(500, e.toString, Some(e.getMessage), Some(e.getLocalizedMessage)))
-      }
-    case Success(response: Try[(String, String, Int)]) =>
-      response match {
-        case Success(value) =>
-          complete(200, ChangeStateResponse(value._3, value._2, value._1))
-        case Failure(e) =>
-          complete(404, ErrorDetail(404, e.toString, Some(e.getMessage), Some(e.getLocalizedMessage)))
       }
   }
 

@@ -34,7 +34,7 @@ class StateServiceTest extends FlatSpec
     Put(s"/state/change/1", NewState("Pending"))~> stateRoute ~> check {
       status shouldBe OK
       contentType shouldBe `application/json`
-      responseAs[ChangeStateResponse] shouldBe ChangeStateResponse(1, "Init", "Pending")
+      responseAs[ChangeStateResponse] shouldBe ChangeStateResponse(1, "Pending", "Init")
     }
   }
 
